@@ -55,16 +55,12 @@ def squeeze(aid_aname_papers):
     gentuple = lambda x: (x, id_name[x], id_papers[x])
     return map(gentuple, id_name.keys())
 
-def exportConfirmedAuthor(authors, outputfile):
+def export(authors, outputfile):
+    # TODO add header rows.
     print("Opening file to writeout...")
     with open(outputfile, 'w+') as fp:
         data = pd.DataFrame.from_records(authors)
-        print(data)
-        input()
-
-
-
-        
+        data.to_csv(authors)
 
 
 def Authors(authorpaperfile):
@@ -83,7 +79,8 @@ def keywords_Paper(paperfile):
     data = pd.read_csv(paperfile, delimiter=',', header=0)
     data.fillna('', inplace=True)
     cleanKeyword = lambda x: re.split(':|;|,|\|| ', x)
-    pid_keywords = zip(data["Id"], map(cleanKeyword, data["Keyword"]))
+    strdata = map(str,data["Id"])
+    pid_keywords = zip(strdata, map(cleanKeyword, data["Keyword"]))
     return dict(pid_keywords)
 
 def authors_Paper(authorfile):
@@ -96,17 +93,27 @@ def authors_Paper(authorfile):
     return list(aid_pids)
 
 def authors_keywords(auth_paper, keyword_paper):
-    """ Reads dicts, creates new relation: {author:keyword} """
-    getKeywords = lambda paper_id: keyword_paper[paper_id]
-    getAuthorKeywords = lambda x: (x[0], list(map(getKeywords, x[1])))
-    auth_kwds = list(map(getAuthorKeywords, auth_paper))
-    return auth_kwds
+   """ Reads dicts, creates new relation: {author:keyword} """
+   # getKeywords = lambda paper_id: keyword_paper[int(paper_id)]
+   # getAuthorKeywords = lambda x: (x[0], list(map(getKeywords, x[1])))
+   # auth_kwds = list(map(getAuthorKeywords, auth_paper))
+   auth_kwds = {}
+   for x in auth_paper:
+       for paper in x[1]:
+           if paper in keyword_paper:
+               if x[0] in auth_kwds:
+                   auth_kwds[x[0]].append(keyword_paper[paper])
+               else:
+                   auth_kwds[x[0]] = keyword_paper[paper]
+   return auth_kwds
     
-
 if __name__ == '__main__':
     #records = Authors('dataRev2/PaperAuthor.csv')
     #exportConfirmedAuthor(records, "confirmedAuthor.csv")
     kwP = keywords_Paper("dataRev2/Paper.csv")
-    aP = authors_Paper("ConfirmedAuthor.csv")
+    aP = authors_Paper("confirmedAuthors.csv")
     aKw = authors_keywords(aP, kwP)
-    print(aKw)
+    li = list(aKw.items())
+    dic = li[:100]
+    df = pd.DataFrame(dic)
+    df.to_csv('Keywords_auth1.csv')
