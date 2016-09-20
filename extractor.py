@@ -6,6 +6,7 @@ Extracts and removes noise, ultimately to give {authors: keywords} relation.
 import re
 import pandas as pd
 from collections import Counter
+import pickle as pi
 
 def second_names(x):
     if x: return x.split()[-1]
@@ -81,6 +82,7 @@ def keywords_Paper(paperfile):
     cleanKeyword = lambda x: re.split(':|;|,|\|| ', x)
     strdata = map(str,data["Id"])
     pid_keywords = zip(strdata, map(cleanKeyword, data["Keyword"]))
+
     return dict(pid_keywords)
 
 def authors_Paper(authorfile):
@@ -101,19 +103,38 @@ def authors_keywords(auth_paper, keyword_paper):
    for x in auth_paper:
        for paper in x[1]:
            if paper in keyword_paper:
-               if x[0] in auth_kwds:
-                   auth_kwds[x[0]].append(keyword_paper[paper])
-               else:
-                   auth_kwds[x[0]] = keyword_paper[paper]
+               for wd in keyword_paper[paper]:
+
+                    if x[0] in auth_kwds:
+                        auth_kwds[x[0]].append(wd)
+                    else:
+                        auth_kwds[x[0]] = []
+                        auth_kwds[x[0]].append(wd)
    return auth_kwds
     
 if __name__ == '__main__':
     #records = Authors('dataRev2/PaperAuthor.csv')
     #exportConfirmedAuthor(records, "confirmedAuthor.csv")
     kwP = keywords_Paper("dataRev2/Paper.csv")
+    print(" keywords of papers : DONE")
+#    for a,b in kwP.items():
+#        print(b)
+#        k = input()
+#        if k == '0':
+#            break
     aP = authors_Paper("confirmedAuthors.csv")
+    print(" authors of papers : DONE")
+#    for a in aP:
+#        print(a)
+#        k = input()
+#        if k == '0':
+#            break
     aKw = authors_keywords(aP, kwP)
-    li = list(aKw.items())
-    dic = li[:100]
-    df = pd.DataFrame(dic)
-    df.to_csv('Keywords_auth1.csv')
+    print(" Keyword of authors : DONE")
+   #j for a,b in aKw.items():
+   #j     print(b)
+   #j     k = input()
+   #j     if k == '0':
+   #j         break
+    f = open('keywrd','wb')
+    pi.dump(aKw,f)

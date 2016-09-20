@@ -36,8 +36,6 @@ class tfidf:
         #creates dicts of words objects keyed with word name
         for w,y in self.dic.items():
            for words in y:
-                print(words)
-                input()
                 if words in self.wrds:
                     self.wrds[words].add(w)
                 else:
