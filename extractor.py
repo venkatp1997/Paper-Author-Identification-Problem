@@ -65,7 +65,7 @@ def export(authors, outputfile):
         data.to_csv(authors)
 
 
-def Authors(authorpaperfile):
+def Authors():
     print("Loading data...")
     data = pd.read_csv('dataRev2/PaperAuthor.csv', delimiter=',', header=0)
     data.fillna('', inplace=True)
@@ -80,6 +80,7 @@ def keywords_Paper(paperfile):
     """ Reads csv, returns dict{ paper_id: keywords} """
     data = pd.read_csv(paperfile, delimiter=',', header=0)
     data.fillna('', inplace=True)
+    data["Keyword"]=[i.lower() for i in data["Keyword"]]
     cleanKeyword = lambda x: re.split(':|;|,|\|| ', x)
     strdata = map(str,data["Id"])
     pid_keywords = zip(strdata, map(cleanKeyword, data["Keyword"]))
@@ -93,7 +94,7 @@ def authors_Paper(authorfile):
     translator = str.maketrans({key:None for key in '\'\"[] '})
     extractPapers = lambda x: x.translate(translator).split(',')
     aid_pids = zip(data["author_id"], map(extractPapers, data["paper_ids"]))
-    return list(aid_pids)
+    return dict(aid_pids)
 
 def authors_keywords(auth_paper, keyword_paper):
    """ Reads dicts, creates new relation: {author:keyword} """
@@ -113,6 +114,14 @@ def authors_keywords(auth_paper, keyword_paper):
                         auth_kwds[x[0]].append(wd)
    return auth_kwds
 
+def noisy_authors():
+    print("Loading data...")
+    data = pd.read_csv('dataRev2/PaperAuthor.csv', delimiter=',', header=0)
+    data.fillna('', inplace=True)
+    print("Loaded data...")
+    aid_aname_papers = zip(data["PaperId"], data["AuthorId"])
+    return list(aid_aname_papers)
+
 def journal_keywords(keyword_paper,papers):
     """ Returns a dict where the key is JournalId and the value is the list of keywords assosciated with all the papers published in that journal. """
     data = pd.read_csv(papers, delimiter=',', header=0)
@@ -128,37 +137,64 @@ def journal_keywords(keyword_paper,papers):
         j=str(j)
         if j not in keyword_paper: continue
         for w in keyword_paper[j]:
-            kWd[i].append(w)
+            kWd[i].append(w.lower())
     return kWd
 
+def paper_journal(papers):
+    data = pd.read_csv(papers, delimiter=',', header=0)
+    data.fillna('', inplace=True)
+    translator = str.maketrans({key:None for key in '\'\"[] '})
+    # extractPapers = lambda x: x.translate(translator).split(',')
+    aid_pids = zip(data["Id"],data["JournalId"])
+    return dict(aid_pids)
+
+def matching_keywords(author_id,paper_id):
+    return set(aKw[author_id]).intersection(set(kwP[paper_id]))
+
 if __name__ == '__main__':
+    # ret=noisy_authors()
+    # AuthorDict=dict()
+    # for i in ret:
+    #     if i[0] not in AuthorDict: AuthorDict[i[0]]=[]
+    #     AuthorDict[i[0]].append(i[1])
+    # pi.dump(AuthorDict,open("A.p","wb"))
+    # for i in ret:
+    #     for j in i[2]:
+    #         if j not in AuthorDict: AuthorDict[j]=[]
+    #         AuthorDict[j].append(i[0])
+    #         if(j==3): print (i[2])
+    # pi.dump(AuthorDict,open("A.p","wb"))
+    # temp=(paper_journal("dataRev2/Paper.csv"))
+    # pi.dump(temp,open("PJ.p","wb"))
     #records = Authors('dataRev2/PaperAuthor.csv')
     #exportConfirmedAuthor(records, "confirmedAuthor.csv")
-    kwP = keywords_Paper("dataRev2/Paper.csv")
-    print(" keywords of papers : DONE")
-#    for a,b in kwP.items():
-#        print(b)
-#        k = input()
-#        if k == '0':
-#            break
-    aP = authors_Paper("confirmedAuthors.csv")
-    print(" authors of papers : DONE")
-#    for a in aP:
-#        print(a)
-#        k = input()
-#        if k == '0':
-#            break
-    aKw = authors_keywords(aP, kwP)
-    print(" Keyword of authors : DONE")
-    T=tfidf.tfidf("keywrd")
-    T.create()
-    # for a,b in aKw.items():
-    #     print(b)
-    #     k = input()
-    #     if k == '0':
-    #         break
-    # f = open('keywrd','wb')
-    # pi.dump(aKw,f)
-    jKw=journal_keywords(kwP,"dataRev2/Paper.csv")
-    f=open('dataRev2/journalKeywords','wb')
-    pi.dump(jKw,f)
+    # global kwP,aP,aKw
+    # kwP = keywords_Paper("dataRev2/Paper.csv")
+    # pi.dump(kwP,open("kWp.p","wb"))
+    # print(" keywords of papers : DONE")
+    # aP = authors_Paper("confirmedAuthors.csv")
+    # pi.dump(aP,open("aP1.p","wb"))
+    # print(" authors of papers : DONE")
+    # aKw = authors_keywords(aP, kwP)
+    # pi.dump(aKw,open("aKw.p","wb"))
+    # print(" Keyword of authors : DONE")
+    # T=tfidf.tfidf("keywrd.p")
+    # T.create()
+    # jKw=journal_keywords(kwP,"dataRev2/Paper.csv")
+    # pi.dump(aKw,open("jKw.p","wb"))
+    # f=open('dataRev2/journalKeywords','wb')
+    # pi.dump(jKw,f)
+
+    #1
+    # for i in aKw:
+    #     for j in kwP:
+    #         ret=matching_keywords(i,j)
+    #         print (aKw[i])
+    #         print (-1)
+    #         print (kwP[j])
+    #         print (-2)
+    #         print (ret)
+    #         # for k in ret:
+    #         #     print (k,T.calculate(i,k))
+    #         n=input()
+    #     n=input()
