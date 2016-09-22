@@ -7,6 +7,7 @@ import re
 import pandas as pd
 from collections import Counter
 import pickle as pi
+import tfidf 
 
 def second_names(x):
     if x: return x.split()[-1]
@@ -111,7 +112,25 @@ def authors_keywords(auth_paper, keyword_paper):
                         auth_kwds[x[0]] = []
                         auth_kwds[x[0]].append(wd)
    return auth_kwds
-    
+
+def journal_keywords(keyword_paper,papers):
+    """ Returns a dict where the key is JournalId and the value is the list of keywords assosciated with all the papers published in that journal. """
+    data = pd.read_csv(papers, delimiter=',', header=0)
+    data.fillna('', inplace=True)
+    translator = str.maketrans({key:None for key in '\'\"[] '})
+    # extractPapers = lambda x: x.translate(translator).split(',')
+    aid_pids = zip(data["JournalId"],data["Id"])
+    jKw=list(aid_pids)
+    kWd={}
+    for (i,j) in jKw:
+        if i not in kWd:
+            kWd[i]=[]
+        j=str(j)
+        if j not in keyword_paper: continue
+        for w in keyword_paper[j]:
+            kWd[i].append(w)
+    return kWd
+
 if __name__ == '__main__':
     #records = Authors('dataRev2/PaperAuthor.csv')
     #exportConfirmedAuthor(records, "confirmedAuthor.csv")
@@ -131,10 +150,15 @@ if __name__ == '__main__':
 #            break
     aKw = authors_keywords(aP, kwP)
     print(" Keyword of authors : DONE")
-   #j for a,b in aKw.items():
-   #j     print(b)
-   #j     k = input()
-   #j     if k == '0':
-   #j         break
-    f = open('keywrd','wb')
-    pi.dump(aKw,f)
+    T=tfidf.tfidf("keywrd")
+    T.create()
+    # for a,b in aKw.items():
+    #     print(b)
+    #     k = input()
+    #     if k == '0':
+    #         break
+    # f = open('keywrd','wb')
+    # pi.dump(aKw,f)
+    jKw=journal_keywords(kwP,"dataRev2/Paper.csv")
+    f=open('dataRev2/journalKeywords','wb')
+    pi.dump(jKw,f)
