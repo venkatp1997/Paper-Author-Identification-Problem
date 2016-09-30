@@ -80,10 +80,13 @@ def keywords_Paper(paperfile):
     """ Reads csv, returns dict{ paper_id: keywords} """
     data = pd.read_csv(paperfile, delimiter=',', header=0)
     data.fillna('', inplace=True)
-    data["Keyword"]=[i.lower() for i in data["Keyword"]]
+    # data["Keyword"]=[i.lower() for i in data["Keyword"]]
+    data1=[i.lower() for i in data["Keyword"]]
+    data2=[i.lower() for i in data["Title"]]
+    data1.append(data2)
     cleanKeyword = lambda x: re.split(':|;|,|\|| ', x)
     strdata = map(str,data["Id"])
-    pid_keywords = zip(strdata, map(cleanKeyword, data["Keyword"]))
+    pid_keywords = zip(strdata, map(cleanKeyword, data1))
 
     return dict(pid_keywords)
 
@@ -103,15 +106,14 @@ def authors_keywords(auth_paper, keyword_paper):
    # auth_kwds = list(map(getAuthorKeywords, auth_paper))
    auth_kwds = {}
    for x in auth_paper:
-       for paper in x[1]:
+       for paper in auth_paper[x]:
            if paper in keyword_paper:
                for wd in keyword_paper[paper]:
-
-                    if x[0] in auth_kwds:
-                        auth_kwds[x[0]].append(wd)
+                    if x in auth_kwds:
+                        auth_kwds[x].append(wd)
                     else:
-                        auth_kwds[x[0]] = []
-                        auth_kwds[x[0]].append(wd)
+                        auth_kwds[x] = []
+                        auth_kwds[x].append(wd)
    return auth_kwds
 
 def noisy_authors():
@@ -119,7 +121,7 @@ def noisy_authors():
     data = pd.read_csv('dataRev2/PaperAuthor.csv', delimiter=',', header=0)
     data.fillna('', inplace=True)
     print("Loaded data...")
-    aid_aname_papers = zip(data["PaperId"], data["AuthorId"])
+    aid_aname_papers = zip(data["AuthorId"], data["PaperId"])
     return list(aid_aname_papers)
 
 def journal_keywords(keyword_paper,papers):
@@ -150,51 +152,3 @@ def paper_journal(papers):
 
 def matching_keywords(author_id,paper_id):
     return set(aKw[author_id]).intersection(set(kwP[paper_id]))
-
-if __name__ == '__main__':
-    # ret=noisy_authors()
-    # AuthorDict=dict()
-    # for i in ret:
-    #     if i[0] not in AuthorDict: AuthorDict[i[0]]=[]
-    #     AuthorDict[i[0]].append(i[1])
-    # pi.dump(AuthorDict,open("A.p","wb"))
-    # for i in ret:
-    #     for j in i[2]:
-    #         if j not in AuthorDict: AuthorDict[j]=[]
-    #         AuthorDict[j].append(i[0])
-    #         if(j==3): print (i[2])
-    # pi.dump(AuthorDict,open("A.p","wb"))
-    # temp=(paper_journal("dataRev2/Paper.csv"))
-    # pi.dump(temp,open("PJ.p","wb"))
-    #records = Authors('dataRev2/PaperAuthor.csv')
-    #exportConfirmedAuthor(records, "confirmedAuthor.csv")
-    # global kwP,aP,aKw
-    # kwP = keywords_Paper("dataRev2/Paper.csv")
-    # pi.dump(kwP,open("kWp.p","wb"))
-    # print(" keywords of papers : DONE")
-    # aP = authors_Paper("confirmedAuthors.csv")
-    # pi.dump(aP,open("aP1.p","wb"))
-    # print(" authors of papers : DONE")
-    # aKw = authors_keywords(aP, kwP)
-    # pi.dump(aKw,open("aKw.p","wb"))
-    # print(" Keyword of authors : DONE")
-    # T=tfidf.tfidf("keywrd.p")
-    # T.create()
-    # jKw=journal_keywords(kwP,"dataRev2/Paper.csv")
-    # pi.dump(aKw,open("jKw.p","wb"))
-    # f=open('dataRev2/journalKeywords','wb')
-    # pi.dump(jKw,f)
-
-    #1
-    # for i in aKw:
-    #     for j in kwP:
-    #         ret=matching_keywords(i,j)
-    #         print (aKw[i])
-    #         print (-1)
-    #         print (kwP[j])
-    #         print (-2)
-    #         print (ret)
-    #         # for k in ret:
-    #         #     print (k,T.calculate(i,k))
-    #         n=input()
-    #     n=input()
