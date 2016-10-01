@@ -1,10 +1,10 @@
 # SMAI-Project
-# # Prerequisites:-
+## Prerequisites:-
 1. Python3
 2. Pickle
 3. Numpy
 4. Pandas
-# # Installation:-
+## Installation:-
 1. Run <pre>git clone https://github.com/venkatp1997/SMAI-Project.git</pre>
 2. Create a directory <pre>dataRev2</pre> inside the repo. 
 3. Download the [data](https://www.kaggle.com/c/kdd-cup-2013-author-paper-identification-challenge/download/dataRev2.zip) and unzip it inside dataRev2.
