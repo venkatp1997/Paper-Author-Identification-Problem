@@ -83,7 +83,13 @@ def keywords_Paper(paperfile):
     # data["Keyword"]=[i.lower() for i in data["Keyword"]]
     data1=[i.lower() for i in data["Keyword"]]
     data2=[i.lower() for i in data["Title"]]
-    data1.append(data2)
+    data3=list(map( str ,data["ConferenceId"]))
+    data4=list(map( str, data["Year"]))
+    data5=list(map(str ,data["JournalId"]))
+    data1 = list(map(lambda x,y: x+','+y , data1,data2))
+    data1 = list(map(lambda x,y: x+','+y , data1,data3))
+    data1 = list(map(lambda x,y: x+','+y , data1,data4))
+    data1 = list(map(lambda x,y: x+','+y , data1,data5))
     cleanKeyword = lambda x: re.split(':|;|,|\|| ', x)
     strdata = map(str,data["Id"])
     pid_keywords = zip(strdata, map(cleanKeyword, data1))
