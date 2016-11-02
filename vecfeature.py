@@ -1,6 +1,7 @@
 import pickle as pi
 import tfidf
 import numpy as np
+import levenshtein
 
 def matching_keywords_pa(aKw,kWp,paperID,authorID):
     # aKw=pi.load(open("aKw.p","rb"))
@@ -83,7 +84,7 @@ def noKeywords_Paper(kWp,paperID):
             cnt+=1
     return cnt
 
-def vec(paperID,authorID,aKw,kWp,aP,jKw,PJ,A,T,nb_flag=0):
+def vec(paperID,authorID,aKw,kWp,aP,jKw,PJ,A,T,aff_Author,aff_PaperAuthor,nb_flag=0):
     vector=np.empty(0)
     #Feature-1
     ret=matching_keywords_pa(aKw,kWp,paperID,authorID)
@@ -213,5 +214,44 @@ def vec(paperID,authorID,aKw,kWp,aP,jKw,PJ,A,T,nb_flag=0):
     #Feature 5
     vector=np.append(vector,noKeywords_Paper(kWp,paperID))
     # print ("Feature-5 Done")
+    word1=""
+    word2=""
+    max2=0
+    max3=0
+    min4=np.inf
+    min5=np.inf
+    if authorID in aff_Author:
+        word1=aff_Author[authorID]
+    if authorID in aff_PaperAuthor:
+        word2=aff_PaperAuthor[authorID]
+    vector=np.append(vector,levenshtein.distance(word1,word2))
+    if paperID in A:
+        for i in A[paperID]:
+            word3=""
+            word4=""
+            if i not in aff_Author and len(word1)==0:
+                max2=max(max2,18.976)
+                min4=min(min4,18.976)
+            if i not in aff_PaperAuthor and len(word2)==0:
+                max3=max(max3,18.65)
+                min5=min(min5,18.65)
+            if i in aff_Author:
+                word3=aff_Author[i]
+                max2=max(max2,levenshtein(word1,word3))
+                min4=min(min4,levenshtein(word1,word3))
+            if i in aff_PaperAuthor:
+                word4=aff_PaperAuthor[i]
+                max3=max(max3,levenshtein(word2,word4))
+                min5=min(min5,levenshtein(word2,word4))
+            if i not in aff_Author and len(word1)!=0:
+                max2=max(max2,levenshtein(word1,word3))
+                min4=min(min4,levenshtein(word1,word3))
+            if i not in aff_PaperAuthor and len(word2)!=0:
+                max3=max(max3,levenshtein(word2,word4))
+                min5=min(min5,levenshtein(word2,word4))
+    vector=np.append(vector,max2)
+    vector=np.append(vector,max3)
+    vector=np.append(vector,min4)
+    vector=np.append(vector,min5)
     return vector
 
